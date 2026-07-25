@@ -66,7 +66,7 @@ jobs:
             pub-${{ runner.os }}-
 
       - name: Resolve Flutter dependencies
-        run: flutter pub get --enforce-lockfile
+        run: flutter pub get 
 
       - name: Generate localizations
         run: flutter gen-l10n
