@@ -64,7 +64,7 @@ Future<void> pushEntrypoint() async {
   );
 }
 
-void _queueBackgroundNotification(Map<String, dynamic> payload) {
+void _queueBackgroundNotification(dynamic message, dynamic instance) {
   _processPushSafely(message, instance);
 }
 
@@ -994,26 +994,18 @@ extension GetAndroidIcon on Uri {
   }
 }
 
+
+
 // --- INIZIO PATCH MUTEX ---
-Future<void> _processPushSafely(Map<String, dynamic> payload) async {
+final Mutex _backgroundPushMutex = Mutex();
+
+Future _processPushSafely(dynamic message, dynamic instance) async {
   await _backgroundPushMutex.protect(() async {
     try {
       await handleBackgroundNotification(message, instance);
     } catch (e, stackTrace) {
       print('[UnifiedPush] Errore Mutex: $e\n$stackTrace');
-    } finally {}
-  });
-}
-
-Future<void> _disposeHeadlessClient() async {
-  if (ClientUtil.client != null) {
-    try {
-      await ClientUtil.client!.database?.flush();
-      ClientUtil.client!.dispose();
-      await ClientUtil.client!.database?.close();
-    } catch (e) {
-      print('[UnifiedPush] Errore clean up DB: $e');
     }
-  }
+  });
 }
 // --- FINE PATCH MUTEX ---
