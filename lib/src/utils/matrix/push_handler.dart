@@ -1,3 +1,7 @@
+import 'package:mutex/mutex.dart';
+
+final Mutex _backgroundPushMutex = Mutex();
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -61,17 +65,8 @@ Future<void> pushEntrypoint() async {
   );
 }
 
-void _queueBackgroundNotification(PushMessage message, String instance) {
-  // Each callback must start immediately. MatrixStoreLease serializes the
-  // database section, while the fast envelope fallback remains independent:
-  // one slow homeserver lookup must never hold later notifications hostage.
-  unawaited(
-    handleBackgroundNotification(message, instance).catchError(
-      (Object error, StackTrace stackTrace) {
-        Logs().e('Background notification failed.', error, stackTrace);
-      },
-    ),
-  );
+void _queueBackgroundNotification(Map<String, dynamic> payload) {
+  _processPushSafely(payload);
 }
 
 enum PushNotificationResult { shown, suppressed, unresolved }
@@ -999,3 +994,29 @@ extension GetAndroidIcon on Uri {
     }
   }
 }
+
+// --- INIZIO PATCH MUTEX ---
+Future<void> _processPushSafely(Map<String, dynamic> payload) async {
+  await _backgroundPushMutex.protect(() async {
+    try {
+      await handleBackgroundNotification(payload);
+    } catch (e, stackTrace) {
+      print('[UnifiedPush] Errore Mutex: $e\n$stackTrace');
+    } finally {
+      await _disposeHeadlessClient();
+    }
+  });
+}
+
+Future<void> _disposeHeadlessClient() async {
+  if (ClientUtil.client != null) {
+    try {
+      await ClientUtil.client!.database?.flush();
+      ClientUtil.client!.dispose();
+      await ClientUtil.client!.database?.close();
+    } catch (e) {
+      print('[UnifiedPush] Errore clean up DB: $e');
+    }
+  }
+}
+// --- FINE PATCH MUTEX ---
