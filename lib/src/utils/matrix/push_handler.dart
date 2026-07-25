@@ -996,6 +996,8 @@ extension GetAndroidIcon on Uri {
 
 
 
+
+
 // --- INIZIO PATCH MUTEX ---
 final Mutex _backgroundPushMutex = Mutex();
 
@@ -1004,7 +1006,7 @@ Future _processPushSafely(dynamic message, dynamic instance) async {
     try {
       await handleBackgroundNotification(message, instance);
     } catch (e, stackTrace) {
-      print('[UnifiedPush] Errore Mutex: $e\n$stackTrace');
+      print('[UnifiedPush] Errore processamento: $e\n$stackTrace');
     }
   });
 }

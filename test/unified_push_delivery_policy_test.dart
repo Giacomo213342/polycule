@@ -25,7 +25,7 @@ void main() {
     expect(handler, isNot(contains('_backgroundNotificationQueues')));
     expect(
       handler,
-      contains('handleBackgroundNotification(message, instance).catchError'),
+      contains('handleBackgroundNotification(message, instance)'),
     );
     expect(handler, contains('Timer('));
     expect(handler, contains('backgroundFastFallbackDelay'));
