@@ -1,6 +1,5 @@
 import 'package:mutex/mutex.dart';
 
-final Mutex _backgroundPushMutex = Mutex();
 
 import 'dart:async';
 import 'dart:convert';
