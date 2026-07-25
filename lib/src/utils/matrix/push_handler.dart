@@ -65,7 +65,7 @@ Future<void> pushEntrypoint() async {
 }
 
 void _queueBackgroundNotification(Map<String, dynamic> payload) {
-  _processPushSafely(payload);
+  _processPushSafely(message, instance);
 }
 
 enum PushNotificationResult { shown, suppressed, unresolved }
@@ -998,12 +998,10 @@ extension GetAndroidIcon on Uri {
 Future<void> _processPushSafely(Map<String, dynamic> payload) async {
   await _backgroundPushMutex.protect(() async {
     try {
-      await handleBackgroundNotification(payload);
+      await handleBackgroundNotification(message, instance);
     } catch (e, stackTrace) {
       print('[UnifiedPush] Errore Mutex: $e\n$stackTrace');
-    } finally {
-      await _disposeHeadlessClient();
-    }
+    } finally {}
   });
 }
 

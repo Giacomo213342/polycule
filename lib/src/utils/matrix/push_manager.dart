@@ -276,10 +276,7 @@ class PushManager {
       lang: localizations.language.replaceAll('_', '-'),
     );
 
-    if (client.isLogged() && client.userID != null && client.onTokenRefresh.isBroadcast) {
-        await client.checkToken();
-      }
-      await client.postPusher(
+    await client.postPusher(
       pusher,
     );
     await settings.storePushKey(client.clientName, pushKey);
